@@ -1,0 +1,11 @@
+Parameters
+  K = 10
+  tau = 10 
+  u = 0
+  
+Variables
+  y = 0
+  
+Equations
+  tau * $y = -y + K * u
+  
