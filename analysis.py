@@ -34,9 +34,11 @@ X = np.column_stack((feature1, feature2))
 half = int(len(feature1) / 2)
 y = np.ones(len(X))
 y[half:] = 0
+
+splits = 10
  
 # Cross Validation
-kf = KFold(n_splits=10, shuffle=True)
+kf = KFold(n_splits=splits, shuffle=True)
 clf = svm.SCV(kernel = 'linear')
 avg_err = 0
 for train_index, test_index in kf.split(X):
@@ -58,7 +60,7 @@ for train_index, test_index in kf.split(X):
 	avg_err += (err / len(y_test))
 
 # divide by n = 10
-avg_err /= 10
+avg_err /= splits
 print avg_err
 
 # Prepare decision line for plotting
