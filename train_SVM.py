@@ -22,6 +22,7 @@ us      = [data[0]['u'], data[1]['u'], data[2]['u']]
 feature1s = []
 feature2s = []
 ys        = []
+u_values  = []
 # Delete the first 5 data points and the 4 data points following each setpoint change
 deletes1 = [0, 1, 2, 3, 4, 41, 42, 43, 44, 81, 82, 83, 84, 121, 122, 123, 124]
 deletes2 = [0, 1, 2, 3, 40, 41, 42, 43, 80, 81, 82, 83, 120, 121, 122, 123]
@@ -30,18 +31,18 @@ for i in range(len(labels)):
     feature1s.append(np.abs(np.delete(y_pred5[i] - y_meas[i], deletes1)))
     feature2s.append(np.abs(np.delete(y_meas[i][1:] - y_meas[i][:159], deletes2)))
     ys.append(np.delete(labels[i], deletes1))
+    u_values.append(np.delete(us[i], deletes1))
 
 # Prepare X and y
 feature1 = np.concatenate((feature1s[0], feature1s[1], feature1s[2]))
 feature2 = np.concatenate((feature2s[0], feature2s[1], feature2s[2]))
-X = np.column_stack((feature1, feature2))
-y = np.concatenate((ys[0], ys[1], ys[2]))
+u        = np.concatenate((u_values[0], u_values[1], u_values[2]))
+X        = np.column_stack((feature1, feature2, u))
+y        = np.concatenate((ys[0], ys[1], ys[2]))
  
 # Fit linear SVM
 clf_lin = svm.SVC(kernel = 'linear')
 clf_lin.fit(X, y)
-w = clf_lin.coef_
-w = w.flatten()
 
 # The Gaussian SVM
 clf_rbf = svm.SVC(kernel = 'rbf')
@@ -54,13 +55,24 @@ with open('LinearClassifier.pkl', 'wb') as f:
 with open('GaussianClassifier.pkl', 'wb') as f:
     pickle.dump(clf_rbf, f)
 
+# Prepare 2D classfiers show the classification in 2D (ignoring the u)
+# Fit linear SVM
+clf_lin_2D = svm.SVC(kernel = 'linear')
+clf_lin_2D.fit(X[:, :2], y)
+w = clf_lin_2D.coef_
+w = w.flatten()
+
+# The Gaussian SVM
+clf_rbf_2D = svm.SVC(kernel = 'rbf')
+clf_rbf_2D.fit(X[:, :2], y)
+
 # Prepare the Linear decision lines for plotting
 a1  = -w[2] / w[3]
 xx1 = np.linspace(-.5, np.max(feature1) + .5)
-yy1 = a1 * xx1 - (clf_lin.intercept_[1]) / w[3]
+yy1 = a1 * xx1 - (clf_lin_2D.intercept_[1]) / w[3]
 a2  = -w[4] / w[5]
 xx2 = np.linspace(-.5, np.max(feature1) + .5)
-yy2 = a2 * xx2 - (clf_lin.intercept_[2]) / w[5]
+yy2 = a2 * xx2 - (clf_lin_2D.intercept_[2]) / w[5]
 
 # Plot the features and the linear decision lines
 plt.figure()
@@ -85,16 +97,35 @@ plt.ylabel('Change in Process Variable')
 plt.title('Raw Data')
 
 plt.subplot(132)
-plt.scatter(feature1[clf_lin.predict(X) == 0], feature2[clf_lin.predict(X) == 0])
-plt.scatter(feature1[clf_lin.predict(X) == 1], feature2[clf_lin.predict(X) == 1])
-plt.scatter(feature1[clf_lin.predict(X) == 2], feature2[clf_lin.predict(X) == 2])
+plt.scatter(feature1[clf_lin_2D.predict(X[:, :2]) == 0], feature2[clf_lin_2D.predict(X[:, :2]) == 0])
+plt.scatter(feature1[clf_lin_2D.predict(X[:, :2]) == 1], feature2[clf_lin_2D.predict(X[:, :2]) == 1])
+plt.scatter(feature1[clf_lin_2D.predict(X[:, :2]) == 2], feature2[clf_lin_2D.predict(X[:, :2]) == 2])
 plt.xlabel('Absolute Prediction Error')
 plt.title('Linear')
 
 plt.subplot(133)
-plt.scatter(feature1[clf_rbf.predict(X) == 0], feature2[clf_rbf.predict(X) == 0])
-plt.scatter(feature1[clf_rbf.predict(X) == 1], feature2[clf_rbf.predict(X) == 1])
-plt.scatter(feature1[clf_rbf.predict(X) == 2], feature2[clf_rbf.predict(X) == 2])
+plt.scatter(feature1[clf_rbf_2D.predict(X[:, :2]) == 0], feature2[clf_rbf_2D.predict(X[:, :2]) == 0])
+plt.scatter(feature1[clf_rbf_2D.predict(X[:, :2]) == 1], feature2[clf_rbf_2D.predict(X[:, :2]) == 1])
+plt.scatter(feature1[clf_rbf_2D.predict(X[:, :2]) == 2], feature2[clf_rbf_2D.predict(X[:, :2]) == 2])
 plt.title('Gaussian')
+
+# 3D plots of the 3D classifiers
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(feature1[y == 0], feature2[y == 0], u[y == 0])
+ax.scatter(feature1[y == 1], feature2[y == 1], u[y == 1])
+ax.scatter(feature1[y == 2], feature2[y == 2], u[y == 2])
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(feature1[clf_lin.predict(X) == 0], feature2[clf_lin.predict(X) == 0], u[clf_lin.predict(X) == 0])
+ax.scatter(feature1[clf_lin.predict(X) == 1], feature2[clf_lin.predict(X) == 1], u[clf_lin.predict(X) == 1])
+ax.scatter(feature1[clf_lin.predict(X) == 2], feature2[clf_lin.predict(X) == 2], u[clf_lin.predict(X) == 2])
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(feature1[clf_rbf.predict(X) == 0], feature2[clf_rbf.predict(X) == 0], u[clf_rbf.predict(X) == 0])
+ax.scatter(feature1[clf_rbf.predict(X) == 1], feature2[clf_rbf.predict(X) == 1], u[clf_rbf.predict(X) == 1])
+ax.scatter(feature1[clf_rbf.predict(X) == 2], feature2[clf_rbf.predict(X) == 2], u[clf_rbf.predict(X) == 2])
 
 plt.show()
