@@ -39,7 +39,7 @@ splits = 10
  
 # Cross Validation
 kf = KFold(n_splits=splits, shuffle=True)
-clf = svm.SCV(kernel = 'linear')
+clf = svm.SVC(kernel = 'linear')
 avg_err = 0
 for train_index, test_index in kf.split(X):
 	X_train, X_test = X[train_index], X[test_index]
@@ -61,7 +61,7 @@ for train_index, test_index in kf.split(X):
 
 # divide by n = 10
 avg_err /= splits
-print avg_err
+print (avg_err)
 
 # Prepare decision line for plotting
 a = -w[0] / w[1]
