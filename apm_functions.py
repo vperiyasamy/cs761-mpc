@@ -8,7 +8,9 @@ def sim_init(s,a):
    apm_option(s,a,'nlc.nodes',3)
    apm_info(s,a,'SV','y')
    apm_info(s,a,'FV','u')
+   apm_info(s,a,'FV', 'k')
    apm_option(s,a,'u.fstatus',1)
+   apm_option(s,a,'K.fstatus',1)
    msg = 'Successful simulator initialization'
    return msg
 
@@ -43,8 +45,9 @@ def mpc_init(s,a):
    msg = 'Successful controller initialization'
    return msg
    
-def sim(s,a,u):
+def sim(s,a,u,K):
    apm_meas(s,a,'u',u)
+   apm_meas(s,a,'k',K)
    apm(s,a,'solve')
    y = apm_tag(s,a,'y.model')
    return y
