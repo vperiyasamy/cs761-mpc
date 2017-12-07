@@ -67,4 +67,5 @@ def mpc(s,a,inputs):
    apm(s,a,'solve')
    u = apm_tag(s,a,'u.newval')
    y_pred5 = apm_tag(s,a,'y.pred[5]')
-   return u, y_pred5
+   y_model = y_meas - apm_tag(s,a,'y.bias')
+   return u, y_pred5, y_model
