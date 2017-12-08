@@ -1,6 +1,6 @@
 import numpy as np
 import pickle
-from sklearn import svm
+from sklearn.neural_network import MLPRegressor
 
 
 data = []
@@ -49,10 +49,10 @@ for j in range(len(y)):
     else:
         y[j] = 10
 
-# Fit linear SVM for regression
-clf_lin = svm.SVR(kernel = 'linear')
-clf_lin.fit(X, y)
+# Fit neural network with adam solver for regression
+clf = MLPRegressor(activation = 'relu', solver = 'adam', alpha = 0.0001, learning_rate = 'adaptive', max_iter = 500)
+clf.fit(X, y)
 
 # Save the classifiers
-with open('LinearRegression.pkl', 'wb') as f:
-    pickle.dump(clf_lin, f)
+with open('NN_Regressor.pkl', 'wb') as f:
+    pickle.dump(clf, f)
