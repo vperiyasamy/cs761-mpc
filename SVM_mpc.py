@@ -27,8 +27,8 @@ params5 = SetSimulationParams(sim_Ks = [10, 1], sim_K_times = [0, 70]) # disturb
 params6 = SetSimulationParams(setpoints = [10, 15], sp_times = [0, 70], sim_Ks = [10]) # setpoint robustness
 params7 = SetSimulationParams(setpoints = [10, 15], sp_times = [0, 70], sim_Ks = [10, 5],
                               sim_K_times = [0, 80]) # transient setpoint change
-params8 = SetSimulationParams(setpoints = [8, 12, 4, 8], sp_times = [0, 60, 90, 120],
-                              sim_Ks = [5, 10, 1], sim_K_times = [0, 30, 70]) # craziness
+params8 = SetSimulationParams(setpoints = [10, 12, 8, 10], sp_times = [0, 50, 110, 130],
+                              sim_Ks = [5, 10], sim_K_times = [0, 70]) # craziness
 simulations = [params1, params2, params3, params4, params5, params6, params7, params8]
 simulations = [params8]
 #%%
@@ -126,9 +126,9 @@ for sim in range(len(simulations)):
         ## Model Predictive Control (MPC)
         u, yp5, ym = apmfun.mpc(server, app2, [setpoint, y_meas, models[most_common_labels[i]]])
     	
-        if (i == 0):
-           # Web viewers to see solution progression
-           apm_web(server, app2) # Controller
+#        if (i == 0):
+#           # Web viewers to see solution progression
+#           apm_web(server, app2) # Controller
     #       apm_web(server, app1)
                       
     # Plot results
